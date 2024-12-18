@@ -24,7 +24,7 @@ def start(update: Update, context: CallbackContext) -> None:
             [InlineKeyboardButton(translate('owner_menu', user_lang), callback_data='owner_menu')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        
+
         # Überprüfe, ob update.message vorhanden ist, andernfalls verwende update.callback_query.message
         if update.message:
             update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
@@ -43,7 +43,7 @@ def change_language(update: Update, context: CallbackContext) -> None:
         [InlineKeyboardButton(language_name, callback_data=f'set_language_{code}')]
         for code, language_name in languages.items()
     ]
-    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back')])
+    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_main_menu')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query = update.callback_query
     query.answer()
@@ -54,7 +54,7 @@ def set_language(update: Update, context: CallbackContext) -> None:
     query.answer()
     user_lang = query.data.split('_')[-1]
     set_user_language(query.from_user.id, user_lang)
-    
+
     # Füge die Bestätigungsmeldung hinzu und ersetze das aktuelle Menü
     keyboard = [[InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -80,7 +80,7 @@ def button(update: Update, context: CallbackContext) -> None:
 def main() -> None:
     # Initialisiere die Datenbank
     init_db()
-    
+
     # Bot initialisieren und starten
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher

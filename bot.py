@@ -1,3 +1,5 @@
+# bot.py
+
 import logging
 import importlib
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -7,7 +9,7 @@ from admin.owner_admin_module import owner_menu, get_admin_modules
 from utils.helpers import is_owner
 from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
-from admin.ad_settings import is_ad_enabled, set_ad_enabled, get_ad_button_label, ad_function_handler, module_name_key
+from admin.ad_module import is_ad_enabled, set_ad_enabled, get_ad_button_label, ad_function_handler, module_name_key, toggle_ad
 from admin.group_manager import add_group, remove_group, get_groups
 from data.persistent_storage import init_db
 
@@ -71,40 +73,6 @@ def set_language(update: Update, context: CallbackContext) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=translate('language_set', user_lang), reply_markup=reply_markup)
 
-def ad_config(update: Update, context: CallbackContext) -> None:
-    if update.effective_user.id != OWNER_ID:
-        update.message.reply_text("You are not authorized to perform this action.")
-        return
-
-    groups = get_groups()
-    keyboard = []
-
-    for chat_id, chat_title in groups.items():
-        current_status = is_ad_enabled(chat_id)
-        status_label = "ON" if current_status else "OFF"
-        keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
-
-def toggle_ad(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query
-    query.answer()
-    chat_id = int(query.data.split('_')[-1])
-    current_status = is_ad_enabled(chat_id)
-    set_ad_enabled(chat_id, not current_status)
-
-    groups = get_groups()
-    keyboard = []
-
-    for chat_id, chat_title in groups.items():
-        current_status = is_ad_enabled(chat_id)
-        status_label = "ON" if current_status else "OFF"
-        keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
-
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
@@ -123,6 +91,8 @@ def button(update: Update, context: CallbackContext) -> None:
         set_language(update, context)
     elif query.data.startswith('toggle_ad_'):
         toggle_ad(update, context)
+    elif query.data == module_name_key:  # Überprüfen Sie direkt auf module_name_key
+        ad_function_handler(update, context)
     elif query.data in [module['name_key'] for module in get_admin_modules()]:  # Dynamische Überprüfung der Module
         module = next(module for module in get_admin_modules() if module['name_key'] == query.data)
         handler_name = f"{module['callback_data']}_handler"
@@ -156,9 +126,6 @@ def main() -> None:
 
     # Handler für den /start Befehl
     dispatcher.add_handler(CommandHandler("start", start))
-
-    # Handler für AD-Konfiguration
-    dispatcher.add_handler(CommandHandler("ad_config", ad_config))
 
     # CallbackQueryHandler für Buttons
     dispatcher.add_handler(CallbackQueryHandler(button))

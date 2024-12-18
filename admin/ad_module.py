@@ -1,7 +1,10 @@
+# ad_module.py
+
 import json
 import os
-from telegram import Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
+from config import OWNER_ID  # Importieren Sie OWNER_ID aus config.py
 
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'ad_settings.json')
 module_name_key = "ad_function"
@@ -32,9 +35,6 @@ def get_ad_button_label(chat_id, chat_title):
     return f"{chat_title} ({ad_status})"
 
 def ad_function_handler(update: Update, context: CallbackContext):
-    ad_config(update, context)  # Ruft die ad_config-Funktion auf, um das AD-Konfigurationsmenü anzuzeigen
-
-def ad_config(update: Update, context: CallbackContext) -> None:
     if update.effective_user.id != OWNER_ID:
         update.message.reply_text("You are not authorized to perform this action.")
         return

@@ -1,7 +1,21 @@
 FlexiCrypto
+
 Bot-Verhalten und Grundlogik
 
-Grundaufbau des Bots Hauptmerkmale: Modularität:
+Grundaufbau des Bots Hauptmerkmale:
+
+Hauptmenü Aufbau:
+
+Sprache wählen:
+-> Sprachen werden über die in /locales hinterlegten Sprachdateien dynamisch geladen. Sprachdateien beinhalten die Bezeichnung ihres Button
+Gruppe wählen:
+-> Untermenü enthält die Gruppe -/Kanal in welcher der Bot aktiv und der Nutzer aktuell admin ist. Button beschriftet sich mit dem aktuellen Gruppen -/Kanalname und passt sich bei änderungen entsprechend an. Beim betätigen der jeweiligen Gruppe werden die in /modules hineterlegten Modulebuttons dynamisch erzeugt und über die jeweiligen Module können Einstellungen für die Gruppe -/Kanal welche zuvor ausgewählt wurde.
+Bot Owner Menü (Butten nur sichtbar für den Bot Owner. ID wird mit der in der .env hinterlegten verglichen):
+-> Untermenü enthält Folgende Menüs:
+Ad Modul -> Untermenü lässt die Ad's Für registrierte Gruppe -/Kanal deaktivieren und aktivieren
+Module -> hier lassen sich Module aus der /modules aktivieren und deaktivieren. (Module sind stadard mäßig deaktivert) Modulbuttons sollen dennoch in den Gruppe -/Kanal Einstellungen angezeigt werden mit dem hinzweis "Wartung"
+
+Modularität:
 Module in /modules und /admin werden automatisch erkannt und geladen, ohne Änderungen am Hauptbot vorzunehmen. Module definieren ihre eigenen Menüstrukturen und Interaktionsmöglichkeiten. Alle Texte, einschließlich Modultexte, werden aus den zentralen Sprachdateien in /locales geladen. Module speichern ihre Einstellungen in einer eigenen SQLite-Datenbank im jeweiligen Modulordner. Sprachunterstützung:
 
 Sprachdateien (/locales/*.json) enthalten alle Texte, einschließlich Modultexte. Texte werden über Namensräume wie module__ eindeutig definiert. Änderungen an Sprachdateien gelten global für den Bot und alle Module. Modulspezifische Speicherung:

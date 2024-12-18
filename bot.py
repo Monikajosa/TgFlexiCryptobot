@@ -2,7 +2,7 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 from config import TOKEN, OWNER_ID, LOG_LEVEL
-from admin.owner_admin_module import owner_menu, handle_owner_menu
+from admin.owner_admin_module import owner_menu, get_admin_modules
 from modules.moderation_module import moderation_module
 from modules.welcome_module import welcome_module
 from utils.helpers import is_owner
@@ -76,6 +76,11 @@ def button(update: Update, context: CallbackContext) -> None:
         start(update, context)
     elif query.data.startswith('set_language_'):
         set_language(update, context)
+    else:
+        # Dynamische Behandlung von Modul-Callback-Daten
+        module = importlib.import_module(f"admin.{query.data}")
+        if hasattr(module, f"{query.data}_handler"):
+            getattr(module, f"{query.data}_handler")(update, context)
 
 def main() -> None:
     # Initialisiere die Datenbank

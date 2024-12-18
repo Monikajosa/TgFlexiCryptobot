@@ -8,6 +8,8 @@ from modules.welcome_module import welcome_module
 from utils.helpers import is_owner
 from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
+from admin.ad_settings import is_ad_enabled, set_ad_enabled, get_ad_button_label
+from admin.group_manager import add_group, remove_group, get_groups
 from data.persistent_storage import init_db
 
 # Konfiguriere das Logging
@@ -16,7 +18,9 @@ logger = logging.getLogger(__name__)
 
 def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
+    chat = update.effective_chat
     user_lang = get_user_language(user.id)
+    add_group(chat.id, chat.title)  # Füge die Gruppe/Kanal hinzu
     print(f"User {user.id} language: {user_lang}")  # Debugging-Ausgabe
     if is_owner(user.id, OWNER_ID):
         keyboard = [
@@ -60,6 +64,38 @@ def set_language(update: Update, context: CallbackContext) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=translate('language_set', user_lang), reply_markup=reply_markup)
 
+def ad_config(update: Update, context: CallbackContext) -> None:
+    if update.effective_user.id != OWNER_ID:
+        update.message.reply_text("You are not authorized to perform this action.")
+        return
+
+    groups = get_groups()
+    keyboard = []
+
+    for chat_id, chat_title in groups.items():
+        button_label = get_ad_button_label(chat_id, chat_title)
+        keyboard.append([InlineKeyboardButton(button_label, callback_data=f"toggle_ad_{chat_id}")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
+
+def toggle_ad(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    query.answer()
+    chat_id = query.data.split('_')[-1]
+    current_status = is_ad_enabled(chat_id)
+    set_ad_enabled(chat_id, not current_status)
+
+    groups = get_groups()
+    keyboard = []
+
+    for chat_id, chat_title in groups.items():
+        button_label = get_ad_button_label(chat_id, chat_title)
+        keyboard.append([InlineKeyboardButton(button_label, callback_data=f"toggle_ad_{chat_id}")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
+
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
@@ -77,6 +113,8 @@ def button(update: Update, context: CallbackContext) -> None:
         start(update, context)
     elif query.data.startswith('set_language_'):
         set_language(update, context)
+    elif query.data.startswith('toggle_ad_'):
+        toggle_ad(update, context)
     else:
         module = importlib.import_module(f"admin.{query.data}")
         if hasattr(module, f"{query.data}_handler"):
@@ -88,6 +126,7 @@ def main() -> None:
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("ad_config", ad_config))
     dispatcher.add_handler(CallbackQueryHandler(button))
 
     updater.start_polling()

@@ -1,4 +1,5 @@
 {
+    "language_name": "Deutsch",
     "welcome": "Willkommen beim Bot!",
     "change_language": "Sprache ändern",
     "select_group": "Gruppe wählen",
@@ -13,5 +14,7 @@
     "moderation_module_active": "Moderationsmodul ist aktiv.",
     "welcome_module_active": "Willkommen im Begrüßungsmodul!",
     "change_language_not_implemented": "Sprache ändern ist derzeit nicht implementiert.",
-    "select_group_not_implemented": "Gruppe wählen ist derzeit nicht implementiert."
+    "select_group_not_implemented": "Gruppe wählen ist derzeit nicht implementiert.",
+    "choose_language": "Wähle deine Sprache:",
+    "language_set": "Sprache wurde eingestellt."
 }

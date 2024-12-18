@@ -61,3 +61,27 @@ FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen im Berei
 
 - **Erweiterte Fehlerprotokollierung:** Fehler werden ausführlich protokolliert, um die Wartung zu erleichtern.
 - **Benachrichtigungen:** Kritische Fehler lösen Benachrichtigungen an den Bot-Owner aus.
+
+### Ordnerstruktur
+
+TgFlexiCryptobot/
+├── admin/
+│ ├── init.py # Lädt alle Admin-Module
+│ ├── owner_admin_module.py # Owner-spezifisches Menü
+├── modules/
+│ ├── init.py # Lädt alle Benutzer-Module
+│ ├── moderation_module.py # Beispiel: Moderationsmodul
+│ ├── welcome_module.py # Beispiel: Begrüßungsmodul
+├── data/
+│ ├── persistent_storage.py # Datenbankinteraktionen
+│ ├── migrations.py # Datenbank-Migrations-Handler
+├── locales/
+│ ├── en.json # Englische Übersetzungen
+│ ├── de.json # Deutsche Übersetzungen
+├── utils/
+│ ├── translation.py # Übersetzungsfunktionen
+│ ├── helpers.py # Allgemeine Hilfsfunktionen
+├── .env # Token, Owner-ID, Log-Level
+├── requirements.txt # Abhängigkeiten
+├── bot.py # Hauptdatei
+├── config.py # Konfigurationen (Konstanten)

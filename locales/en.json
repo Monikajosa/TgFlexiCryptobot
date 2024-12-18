@@ -11,5 +11,7 @@
     "module_management_not_implemented": "Module Management is not implemented yet.",
     "bot_status_not_implemented": "Bot Status is not implemented yet.",
     "moderation_module_active": "Moderation module is active.",
-    "welcome_module_active": "Welcome to the welcome module!"
+    "welcome_module_active": "Welcome to the welcome module!",
+    "change_language_not_implemented": "Change Language is not implemented yet.",
+    "select_group_not_implemented": "Select Group is not implemented yet."
 }

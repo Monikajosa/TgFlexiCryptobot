@@ -15,24 +15,26 @@ logger = logging.getLogger(__name__)
 
 def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
+    user_lang = user.language_code
     if is_owner(user.id, OWNER_ID):
         keyboard = [
-            [InlineKeyboardButton(translate('change_language', user.language_code), callback_data='change_language')],
-            [InlineKeyboardButton(translate('select_group', user.language_code), callback_data='select_group')],
-            [InlineKeyboardButton(translate('owner_menu', user.language_code), callback_data='owner_menu')],
+            [InlineKeyboardButton(translate('change_language', user_lang), callback_data='change_language')],
+            [InlineKeyboardButton(translate('select_group', user_lang), callback_data='select_group')],
+            [InlineKeyboardButton(translate('owner_menu', user_lang), callback_data='owner_menu')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text(translate('welcome', user.language_code), reply_markup=reply_markup)
+        update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
     else:
-        update.message.reply_text(translate('welcome', user.language_code))
+        update.message.reply_text(translate('welcome', user_lang))
 
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
+    user_lang = query.from_user.language_code
     if query.data == 'change_language':
-        query.edit_message_text(text=translate('change_language_not_implemented', query.from_user.language_code))
+        query.edit_message_text(text=translate('change_language_not_implemented', user_lang))
     elif query.data == 'select_group':
-        query.edit_message_text(text=translate('select_group_not_implemented', query.from_user.language_code))
+        query.edit_message_text(text=translate('select_group_not_implemented', user_lang))
     elif query.data == 'owner_menu':
         owner_menu(update, context)
     elif query.data == 'back':

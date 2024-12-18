@@ -55,13 +55,10 @@ def set_language(update: Update, context: CallbackContext) -> None:
     user_lang = query.data.split('_')[-1]
     set_user_language(query.from_user.id, user_lang)
     
-    # Erstelle das Hauptmenü nach der Sprachwahl neu
-    start(update, context)
-    
-    # Füge die Bestätigungsmeldung hinzu
+    # Füge die Bestätigungsmeldung hinzu und ersetze das aktuelle Menü
     keyboard = [[InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.message.reply_text(translate('language_set', user_lang), reply_markup=reply_markup)
+    query.edit_message_text(text=translate('language_set', user_lang), reply_markup=reply_markup)
 
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query

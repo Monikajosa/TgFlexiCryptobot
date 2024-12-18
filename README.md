@@ -11,6 +11,7 @@ FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen im Berei
 - **Sprache wählen:**
   - Das Modul "Sprache ändern" liegt in /modules und gehört zum Grundgerüst und stellt folgende Funktion zur Verfügung:
     - Sprachen werden dynamisch über die in `/locales` hinterlegten Sprachdateien geladen. Die Sprachdateien beinhalten die Bezeichnung ihres Buttons.
+      - Die gewählte Sprache wird global für den bot gesetzt.
 - **Gruppe wählen:** 
   - Untermenü enthält die Gruppe/Kanal, in welcher der Bot aktiv ist und der Nutzer aktuell Admin ist. Der Button beschriftet sich mit dem aktuellen Gruppen-/Kanalnamen und passt sich bei Änderungen automatisch an.
 - **Owner Admin Menü**

@@ -1,58 +1,44 @@
-import os
+import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
-from dotenv import load_dotenv
-import logging
+from config import TOKEN, OWNER_ID, LOG_LEVEL
+from admin.owner_admin_module import owner_menu, handle_owner_menu
+from modules.moderation_module import moderation_module
+from modules.welcome_module import welcome_module
+from utils.helpers import is_owner
 
-# Load environment variables
-load_dotenv()
-
-TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-OWNER_ID = os.getenv('OWNER_ID')
-
-# Configure logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
-# Function to start the bot and show the main menu
-def start(update: Update, context: CallbackContext):
-    user_id = update.message.from_user.id
-    keyboard = [
-        [InlineKeyboardButton("Sprache wählen", callback_data='change_language')],
-        [InlineKeyboardButton("Gruppe wählen", callback_data='choose_group')]
-    ]
-    if str(user_id) == OWNER_ID:
-        keyboard.append([InlineKeyboardButton("Owner Admin Menü", callback_data='admin_menu')])
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Hauptmenü:', reply_markup=reply_markup)
+def start(update: Update, context: CallbackContext) -> None:
+    user = update.effective_user
+    if is_owner(user.id, OWNER_ID):
+        keyboard = [
+            [InlineKeyboardButton("Sprache ändern", callback_data='change_language')],
+            [InlineKeyboardButton("Gruppe wählen", callback_data='select_group')],
+            [InlineKeyboardButton("Owner Admin Menü", callback_data='owner_menu')],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text('Willkommen! Bitte wähle eine Option:', reply_markup=reply_markup)
+    else:
+        update.message.reply_text('Willkommen! Du hast keine Berechtigung, um auf das Admin-Menü zuzugreifen.')
 
-# Callback for handling button clicks
-def button(update: Update, context: CallbackContext):
+def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
-
     if query.data == 'change_language':
-        query.edit_message_text(text="Sprachauswahl: (dynamisch geladen)")
-    elif query.data == 'choose_group':
-        query.edit_message_text(text="Gruppenwahl: (dynamisch geladen)")
-    elif query.data == 'admin_menu':
-        query.edit_message_text(text="Admin Menü: (dynamisch geladen)")
+        query.edit_message_text(text="Sprache ändern ist derzeit nicht implementiert.")
+    elif query.data == 'select_group':
+        query.edit_message_text(text="Gruppe wählen ist derzeit nicht implementiert.")
+    elif query.data == 'owner_menu':
+        owner_menu(update, context)
 
-# Error handler
-def error(update: Update, context: CallbackContext):
-    logger.warning(f'Update "{update}" caused error "{context.error}"')
+def main() -> None:
+    updater = Updater(TOKEN)
+    dispatcher = updater.dispatcher
 
-def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
-
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CallbackQueryHandler(button))
-    dp.add_error_handler(error)
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CallbackQueryHandler(button))
 
     updater.start_polling()
     updater.idle()

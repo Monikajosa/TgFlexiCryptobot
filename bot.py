@@ -17,17 +17,20 @@ from data.persistent_storage import init_db
 logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
+def is_group_registered(chat_id):
+    groups = get_groups()
+    return str(chat_id) in groups
+
 def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
-    # Wenn der Chat ein Gruppenchat oder ein Kanal ist
     if chat.type in ['group', 'supergroup', 'channel']:
-        add_group(chat.id, chat.title)  # Gruppe/Kanal registrieren
-        update.message.reply_text(translate('group_registered', get_user_language(user.id)))
+        if not is_group_registered(chat.id):
+            add_group(chat.id, chat.title)  # Gruppe/Kanal registrieren
+            update.message.reply_text(translate('group_registered', get_user_language(user.id)).format(chat_title=chat.title))
     else:
         user_lang = get_user_language(user.id)
-        print(f"User {user.id} language: {user_lang}")  # Debugging-Ausgabe
         if is_owner(user.id, OWNER_ID):
             keyboard = [
                 [InlineKeyboardButton(translate('change_language', user_lang), callback_data='change_language')],
@@ -80,7 +83,9 @@ def ad_config(update: Update, context: CallbackContext) -> None:
 
     for chat_id, chat_title in groups.items():
         button_label = get_ad_button_label(chat_id, chat_title)
-        keyboard.append([InlineKeyboardButton(button_label, callback_data=f"toggle_ad_{chat_id}")])
+        current_status = is_ad_enabled(chat_id)
+        status_label = "Enabled" if current_status else "Disabled"
+        keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
@@ -88,7 +93,7 @@ def ad_config(update: Update, context: CallbackContext) -> None:
 def toggle_ad(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
-    chat_id = query.data.split('_')[-1]
+    chat_id = int(query.data.split('_')[-1])
     current_status = is_ad_enabled(chat_id)
     set_ad_enabled(chat_id, not current_status)
 
@@ -97,7 +102,9 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
 
     for chat_id, chat_title in groups.items():
         button_label = get_ad_button_label(chat_id, chat_title)
-        keyboard.append([InlineKeyboardButton(button_label, callback_data=f"toggle_ad_{chat_id}")])
+        current_status = is_ad_enabled(chat_id)
+        status_label = "Enabled" if current_status else "Disabled"
+        keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
@@ -106,7 +113,6 @@ def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     user_lang = get_user_language(query.from_user.id)
-    print(f"User {query.from_user.id} language: {user_lang}")  # Debugging-Ausgabe
     if query.data == 'change_language':
         change_language(update, context)
     elif query.data == 'select_group':

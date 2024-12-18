@@ -1,12 +1,8 @@
-Hier ist eine überarbeitete und strukturierte Version der README-Datei, die die hinzugefügten Details berücksichtigt:
-
----
-
 # FlexiCrypto Bot
 
 ## Übersicht
 
-FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen zur Verwaltung und Moderation von Gruppen bietet. Die Module sind so konzipiert, dass sie unabhängig arbeiten und einfach hinzugefügt oder entfernt werden können, ohne den Hauptbot zu verändern.
+FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen zur Verwaltung und Moderation von Gruppen und Kanälen bietet. Die Module sind so konzipiert, dass sie unabhängig arbeiten und einfach hinzugefügt oder entfernt werden können, ohne den Hauptbot zu verändern.
 
 ## Hauptmerkmale
 
@@ -16,10 +12,14 @@ FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen zur Verw
   - Sprachen werden dynamisch über die in `/locales` hinterlegten Sprachdateien geladen. Die Sprachdateien beinhalten die Bezeichnung ihres Buttons.
 - **Gruppe wählen:** 
   - Untermenü enthält die Gruppe/Kanal, in welcher der Bot aktiv ist und der Nutzer aktuell Admin ist. Der Button beschriftet sich mit dem aktuellen Gruppen-/Kanalnamen und passt sich bei Änderungen automatisch an.
-- **Bot Owner Menü:** 
-  - Nur sichtbar für den Bot Owner. Die ID wird mit der in der `.env` hinterlegten verglichen. Das Untermenü enthält:
-    - **Ad Modul:** Ermöglicht das Aktivieren/Deaktivieren der Ads für registrierte Gruppen/Kanäle.
-    - **Module:** Aktivierung und Deaktivierung von Modulen aus dem `/modules` Ordner. Module sind standardmäßig deaktiviert, Modulbuttons werden dennoch in den Gruppen-/Kanaleinstellungen angezeigt.
+- **Owner Admin Menü**
+  - Zugang
+    - Nur die in `.env` definierte Owner-ID hat Zugriff auf dieses Menü.
+  - Funktionen
+    - **AD-Funktion:** Aktivierung/Deaktivierung für jede Gruppe.
+    - **Modulverwaltung:** Aktivierung/Deaktivierung von Modulen.
+    - **Logging:** Anzeige und Verwaltung von Fehlerprotokollen.
+    - **Bot-Status:** Übersicht über aktive Gruppen, Benutzer und Speicherverbrauch.
 
 ### Modularität
 
@@ -27,6 +27,7 @@ FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen zur Verw
 - **Eigene Menüstrukturen:** Module definieren ihre eigenen Menüstrukturen und Interaktionsmöglichkeiten.
 - **Sprachdateien:** Alle Texte, einschließlich Modultexte, werden über Sprachdateien in `/locales/*.json` verwaltet. Änderungen gelten global.
 - **Eigene SQLite-Datenbanken:** Jedes Modul verwaltet eine eigene SQLite-Datenbank zur Speicherung von Einstellungen und Daten.
+- **Modul-Hooks und Events:** Module können auf bestimmte Events reagieren und eigene Hooks definieren.
 
 ### Gruppenspezifische Funktionen
 
@@ -40,6 +41,16 @@ FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen zur Verw
 - **Admin-Menü:** Spezielles Menü für Gruppen-Admins und den Owner.
 - **Dynamische Menüs:** Menüs und Buttons werden dynamisch aus den Sprachdateien generiert.
 - **Sprachwechsel:** Benutzer können die Sprache des Bots ändern, die sofort übernommen wird.
+
+### Sicherheitsmaßnahmen
+
+- **Eingabeverifizierung:** Alle Benutzereingaben werden verifiziert und validiert, um Sicherheitslücken wie SQL-Injection zu verhindern.
+- **Zugriffskontrollen:** Zugriffskontrollen und Berechtigungen werden strikt verwaltet, um unbefugten Zugriff zu verhindern.
+
+### Fehlerbehandlung und Logging
+
+- **Erweiterte Fehlerprotokollierung:** Fehler werden ausführlich protokolliert, um die Wartung zu erleichtern.
+- **Benachrichtigungen:** Kritische Fehler lösen Benachrichtigungen an den Bot-Owner aus.
 
 ## Datenbankstruktur
 
@@ -111,20 +122,3 @@ Alle Texte werden zentral in Sprachdateien verwaltet. Die Texte sind durch Namen
   "module_moderation_ban_button": "Ban User"
 }
 ```
-
-## Owner Admin Menü
-
-### Zugang
-
-Nur die in `.env` definierte Owner-ID hat Zugriff auf dieses Menü.
-
-### Funktionen
-
-- **AD-Funktion:** Aktivierung/Deaktivierung für jede Gruppe.
-- **Modulverwaltung:** Aktivierung/Deaktivierung von Modulen.
-- **Logging:** Anzeige und Verwaltung von Fehlerprotokollen.
-- **Bot-Status:** Übersicht über aktive Gruppen, Benutzer und Speicherverbrauch.
-
----
-
-Diese Strukturierung sorgt für eine klare und verständliche Dokumentation, die es einfacher macht, den Bot zu entwickeln und zu verwalten. Lass mich wissen, ob du weitere Anpassungen oder Ergänzungen benötigst.

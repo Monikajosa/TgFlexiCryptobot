@@ -21,13 +21,13 @@ def get_admin_modules():
 def owner_menu(update: Update, context: CallbackContext) -> None:
     user_lang = context.user_data.get('language', update.effective_user.language_code)
     admin_modules = get_admin_modules()
-    
+
     keyboard = [
         [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=module['callback_data'])]
         for module in admin_modules
     ]
     keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_main_menu')])
-    
+
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if update.message:

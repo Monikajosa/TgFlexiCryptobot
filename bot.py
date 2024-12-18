@@ -25,7 +25,6 @@ def start(update: Update, context: CallbackContext) -> None:
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        # Überprüfe, ob update.message vorhanden ist, andernfalls verwende update.callback_query.message
         if update.message:
             update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
         elif update.callback_query:
@@ -55,7 +54,6 @@ def set_language(update: Update, context: CallbackContext) -> None:
     user_lang = query.data.split('_')[-1]
     set_user_language(query.from_user.id, user_lang)
 
-    # Füge die Bestätigungsmeldung hinzu und ersetze das aktuelle Menü
     keyboard = [[InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=translate('language_set', user_lang), reply_markup=reply_markup)
@@ -67,7 +65,7 @@ def button(update: Update, context: CallbackContext) -> None:
     if query.data == 'change_language':
         change_language(update, context)
     elif query.data == 'select_group':
-        query.edit_message_text(text=translate('select_group_not_implemented', user_lang))
+        query.edit_message_text(translate('select_group_not_implemented', user_lang))
     elif query.data == 'owner_menu':
         owner_menu(update, context)
     elif query.data == 'back':
@@ -77,16 +75,12 @@ def button(update: Update, context: CallbackContext) -> None:
     elif query.data.startswith('set_language_'):
         set_language(update, context)
     else:
-        # Dynamische Behandlung von Modul-Callback-Daten
         module = importlib.import_module(f"admin.{query.data}")
         if hasattr(module, f"{query.data}_handler"):
             getattr(module, f"{query.data}_handler")(update, context)
 
 def main() -> None:
-    # Initialisiere die Datenbank
     init_db()
-
-    # Bot initialisieren und starten
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 

@@ -11,7 +11,12 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
         [InlineKeyboardButton(translate('back', user_lang), callback_data='back')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
+
+    # Überprüfe, ob update.message vorhanden ist, und verwende es, andernfalls verwende update.callback_query.message
+    if update.message:
+        update.message.reply_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
+    elif update.callback_query:
+        update.callback_query.message.reply_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
 
 def handle_owner_menu(update: Update, context: CallbackContext) -> None:
     query = update.callback_query

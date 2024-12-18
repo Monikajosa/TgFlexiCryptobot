@@ -20,6 +20,7 @@ def get_admin_modules():
 
 def owner_menu(update: Update, context: CallbackContext) -> None:
     user_lang = context.user_data.get('language', update.effective_user.language_code)
+    print(f"User {update.effective_user.id} language: {user_lang}")  # Debugging-Ausgabe
     admin_modules = get_admin_modules()
 
     keyboard = [

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     user_lang = get_user_language(user.id)
+    print(f"User {user.id} language: {user_lang}")  # Debugging-Ausgabe
     if is_owner(user.id, OWNER_ID):
         keyboard = [
             [InlineKeyboardButton(translate('change_language', user_lang), callback_data='change_language')],
@@ -53,6 +54,7 @@ def set_language(update: Update, context: CallbackContext) -> None:
     query.answer()
     user_lang = query.data.split('_')[-1]
     set_user_language(query.from_user.id, user_lang)
+    print(f"Set user {query.from_user.id} language to {user_lang}")  # Debugging-Ausgabe
 
     keyboard = [[InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -62,6 +64,7 @@ def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     user_lang = get_user_language(query.from_user.id)
+    print(f"User {query.from_user.id} language: {user_lang}")  # Debugging-Ausgabe
     if query.data == 'change_language':
         change_language(update, context)
     elif query.data == 'select_group':

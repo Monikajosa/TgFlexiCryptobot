@@ -11,6 +11,7 @@ def load_translation(language_code):
 
 def translate(key, language_code='en'):
     translations = load_translation(language_code)
+    print(f"Translating key: {key} using language: {language_code}")  # Debugging-Ausgabe
     return translations.get(key, key)
 
 def get_available_languages():

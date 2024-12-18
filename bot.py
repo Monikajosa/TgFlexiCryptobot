@@ -4,12 +4,10 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, Filters, MessageHandler
 from config import TOKEN, OWNER_ID, LOG_LEVEL
 from admin.owner_admin_module import owner_menu, get_admin_modules
-from modules.moderation_module import moderation_module
-from modules.welcome_module import welcome_module
 from utils.helpers import is_owner
 from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
-from admin.ad_settings import is_ad_enabled, set_ad_enabled, get_ad_button_label
+from admin.ad_settings import is_ad_enabled, set_ad_enabled, get_ad_button_label, ad_function_handler, module_name_key
 from admin.group_manager import add_group, remove_group, get_groups
 from data.persistent_storage import init_db
 
@@ -35,7 +33,7 @@ def start(update: Update, context: CallbackContext) -> None:
             keyboard = [
                 [InlineKeyboardButton(translate('change_language', user_lang), callback_data='change_language')],
                 [InlineKeyboardButton(translate('select_group', user_lang), callback_data='select_group')],
-                [InlineKeyboardButton(translate('owner_menu', user_lang), callback_data='owner_menu')],
+                [InlineKeyboardButton(translate('owner_menu', user_lang), callback_data='owner_menu')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -82,9 +80,8 @@ def ad_config(update: Update, context: CallbackContext) -> None:
     keyboard = []
 
     for chat_id, chat_title in groups.items():
-        button_label = get_ad_button_label(chat_id, chat_title)
         current_status = is_ad_enabled(chat_id)
-        status_label = "Enabled" if current_status else "Disabled"
+        status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -101,9 +98,8 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
     keyboard = []
 
     for chat_id, chat_title in groups.items():
-        button_label = get_ad_button_label(chat_id, chat_title)
         current_status = is_ad_enabled(chat_id)
-        status_label = "Enabled" if current_status else "Disabled"
+        status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -127,10 +123,31 @@ def button(update: Update, context: CallbackContext) -> None:
         set_language(update, context)
     elif query.data.startswith('toggle_ad_'):
         toggle_ad(update, context)
+    elif query.data in [module['name_key'] for module in get_admin_modules()]:  # Dynamische Überprüfung der Module
+        module = next(module for module in get_admin_modules() if module['name_key'] == query.data)
+        handler_name = f"{module['callback_data']}_handler"
+        module_obj = importlib.import_module(f"admin.{module['callback_data']}")
+        if hasattr(module_obj, handler_name):
+            getattr(module_obj, handler_name)(update, context)
     else:
-        module = importlib.import_module(f"admin.{query.data}")
-        if hasattr(module, f"{query.data}_handler"):
-            getattr(module, f"{query.data}_handler")(update, context)
+        query.edit_message_text(text=translate('unknown_command', user_lang))
+
+def owner_menu(update: Update, context: CallbackContext) -> None:
+    user_lang = get_user_language(update.effective_user.id)
+    admin_modules = get_admin_modules()
+
+    keyboard = [
+        [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=module['callback_data'])]
+        for module in admin_modules
+    ]
+    keyboard.append([InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if update.message:
+        update.message.reply_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
+    elif update.callback_query:
+        update.callback_query.message.edit_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
 
 def main() -> None:
     init_db()
@@ -140,8 +157,8 @@ def main() -> None:
     # Handler für den /start Befehl
     dispatcher.add_handler(CommandHandler("start", start))
 
-    # Beispiel für einen spezifischen Befehl in einem Modul
-    dispatcher.add_handler(CommandHandler("specific_command", specific_command, Filters.chat_type.groups))
+    # Handler für AD-Konfiguration
+    dispatcher.add_handler(CommandHandler("ad_config", ad_config))
 
     # CallbackQueryHandler für Buttons
     dispatcher.add_handler(CallbackQueryHandler(button))

@@ -1,7 +1,10 @@
 import json
 import os
+from telegram import Update
+from telegram.ext import CallbackContext
 
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'ad_settings.json')
+module_name_key = "ad_function"
 
 def load_settings():
     if os.path.exists(SETTINGS_FILE):
@@ -28,8 +31,39 @@ def get_ad_button_label(chat_id, chat_title):
     ad_status = "ON" if is_ad_enabled(chat_id) else "OFF"
     return f"{chat_title} ({ad_status})"
 
-module_name_key = "ad_function"
+def ad_function_handler(update: Update, context: CallbackContext):
+    ad_config(update, context)  # Ruft die ad_config-Funktion auf, um das AD-Konfigurationsmenü anzuzeigen
 
-def ad_function_handler(update, context):
-    # Implementierung der Funktionalität
-    pass
+def ad_config(update: Update, context: CallbackContext) -> None:
+    if update.effective_user.id != OWNER_ID:
+        update.message.reply_text("You are not authorized to perform this action.")
+        return
+
+    groups = get_groups()
+    keyboard = []
+
+    for chat_id, chat_title in groups.items():
+        current_status = is_ad_enabled(chat_id)
+        status_label = "ON" if current_status else "OFF"
+        keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
+
+def toggle_ad(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    query.answer()
+    chat_id = int(query.data.split('_')[-1])
+    current_status = is_ad_enabled(chat_id)
+    set_ad_enabled(chat_id, not current_status)
+
+    groups = get_groups()
+    keyboard = []
+
+    for chat_id, chat_title in groups.items():
+        current_status = is_ad_enabled(chat_id)
+        status_label = "ON" if current_status else "OFF"
+        keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)

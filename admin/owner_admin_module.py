@@ -3,7 +3,7 @@ import importlib
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from utils.translation import translate
-from utils.persistence import get_user_language  # Fügen Sie diesen Import hinzu
+from utils.persistence import get_user_language
 
 def get_admin_modules():
     modules = []
@@ -20,8 +20,7 @@ def get_admin_modules():
     return modules
 
 def owner_menu(update: Update, context: CallbackContext) -> None:
-    user_lang = get_user_language(update.effective_user.id)  # Verwenden Sie die importierte Funktion
-    print(f"User {update.effective_user.id} language: {user_lang}")  # Debugging-Ausgabe
+    user_lang = get_user_language(update.effective_user.id)
     admin_modules = get_admin_modules()
 
     keyboard = [

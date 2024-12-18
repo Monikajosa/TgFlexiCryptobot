@@ -8,6 +8,7 @@ from modules.welcome_module import welcome_module
 from utils.helpers import is_owner
 from data.persistent_storage import init_db
 
+# Konfiguriere das Logging
 logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
 

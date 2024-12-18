@@ -23,9 +23,17 @@ def start(update: Update, context: CallbackContext) -> None:
             [InlineKeyboardButton(translate('owner_menu', user_lang), callback_data='owner_menu')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
+        
+        # Überprüfe, ob update.message vorhanden ist, andernfalls verwende update.callback_query.message
+        if update.message:
+            update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
+        elif update.callback_query:
+            update.callback_query.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
     else:
-        update.message.reply_text(translate('welcome', user_lang))
+        if update.message:
+            update.message.reply_text(translate('welcome', user_lang))
+        elif update.callback_query:
+            update.callback_query.message.reply_text(translate('welcome', user_lang))
 
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query

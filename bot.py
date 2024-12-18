@@ -6,6 +6,7 @@ from admin.owner_admin_module import owner_menu, handle_owner_menu
 from modules.moderation_module import moderation_module
 from modules.welcome_module import welcome_module
 from utils.helpers import is_owner
+from data.persistent_storage import init_db
 
 logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
@@ -34,6 +35,10 @@ def button(update: Update, context: CallbackContext) -> None:
         owner_menu(update, context)
 
 def main() -> None:
+    # Initialisiere die Datenbank
+    init_db()
+    
+    # Bot initialisieren und starten
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 

@@ -2,7 +2,7 @@
 
 ## Übersicht
 
-FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen im Bereich Crypto zur Verwaltung und Moderation von Gruppen und Kanälen bietet. Die Module sind so konzipiert, dass sie unabhängig voneinander arbeiten und leicht hinzugefügt oder entfernt werden können.
+FlexiCrypto ist ein modularer Telegram-Bot, der verschiedene Funktionen im Bereich Crypto zur Verwaltung und Moderation von Gruppen und Kanälen bietet. Die Module sind so konzipiert, dass sie unabhängig voneinander arbeiten und einfach erweitert werden können.
 
 ## Ordnerstruktur
 
@@ -25,6 +25,7 @@ TgFlexiCryptobot/
 │   ├── de.json                   # Deutsche Übersetzungen
 ├── utils/
 │   ├── translation.py            # Übersetzungsfunktionen
+│   ├── persistence.py            # Speicherung von Benutzerdaten
 │   ├── helpers.py                # Allgemeine Hilfsfunktionen
 ├── .env                          # Token, Owner-ID, Log-Level
 ├── requirements.txt              # Abhängigkeiten
@@ -39,7 +40,7 @@ TgFlexiCryptobot/
 - **Sprache wählen:**
   - Das Modul "Sprache ändern" liegt in `/modules` und gehört zum Grundgerüst und stellt folgende Funktion zur Verfügung:
     - Sprachen werden dynamisch über die in `/locales` hinterlegten Sprachdateien geladen. Die Sprachdateien beinhalten die Bezeichnung ihres Buttons.
-    - Die gewählte Sprache wird global für den Bot gesetzt.
+    - Die gewählte Sprache wird persistent gespeichert und bleibt auch nach einem Neustart des Bots erhalten.
 
 - **Gruppe wählen:** 
   - Untermenü enthält die Gruppe/Kanal, in welcher der Bot aktiv ist und der Nutzer aktuell Admin ist. Der Button beschriftet sich mit dem aktuellen Gruppen-/Kanalnamen und passt sich bei Änderungen automatisch an.
@@ -52,11 +53,12 @@ TgFlexiCryptobot/
       - AD-Funktion: Aktivierung/Deaktivierung für jede Gruppe.
       - Modulverwaltung: Aktivierung/Deaktivierung von Modulen.
       - Bot-Status: Übersicht über aktive Gruppen und Benutzer.
+    - Das Menü wird jetzt aktualisiert, anstatt ein neues Menü zu erzeugen, wenn darauf zugegriffen wird.
 
 ### Botaktionen
 
 - **Reaktion in Gruppe/Kanal:**
-  - Nachdem der Bot einer Gruppe/Kanal hinzugefügt wurde, reagiert er einmalig mit "Bot aktiv. Einstellungen können PRIVAT vorgenommen werden". Nach der ersten Reaktion keine weiteren Reaktionen mehr.
+  - Nachdem der Bot einer Gruppe/Kanal hinzugefügt wurde, reagiert er einmalig mit "Bot aktiv. Einstellungen können PRIVAT vorgenommen werden". Nach der ersten Reaktion keine weiteren Reaktionen in der Gruppe/Kanal.
 
 - **Reaktion in privater Konversation:**
   - Nachdem der Bot privat gestartet wurde, zeigt er das Hauptmenü an. Jegliche zuvor gesetzte Einstellung wird geladen.
@@ -66,7 +68,7 @@ TgFlexiCryptobot/
 - **Automatische Modul-Erkennung:** Module in `/modules` und `/admin` werden automatisch erkannt und geladen.
 - **Eigene Menüstrukturen:** Module definieren ihre eigenen Menüstrukturen und Interaktionsmöglichkeiten.
 - **Sprachdateien:** Alle Texte, einschließlich Modultexte, werden über Sprachdateien in `/locales/*.json` verwaltet. Änderungen gelten global. Standardsprache sollte die der Nutzerapp sein.
-- **Eigene SQLite-Datenbanken:** Jedes Modul verwaltet eine eigene SQLite-Datenbank zur Speicherung von Einstellungen und Daten. Diese müssen so aufgebaut sein, dass Daten bei Anpassungen, Bot-Abstürzen etc. nicht verloren gehen.
+- **Eigene SQLite-Datenbanken:** Jedes Modul verwaltet eine eigene SQLite-Datenbank zur Speicherung von Einstellungen und Daten. Diese müssen so aufgebaut sein, dass Daten bei Anpassungen, Bot-Abstürzen oder Upgrades erhalten bleiben.
 - **Modul-Hooks und Events:** Module können auf bestimmte Ereignisse im Bot reagieren und eigene Aktionen ausführen.
 
 ### Gruppenspezifische Funktionen

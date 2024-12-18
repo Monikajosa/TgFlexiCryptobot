@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
-    user_lang = user.language_code
+    user_lang = context.user_data.get('language', user.language_code)
     if is_owner(user.id, OWNER_ID):
         keyboard = [
             [InlineKeyboardButton(translate('change_language', user_lang), callback_data='change_language')],
@@ -28,15 +28,15 @@ def start(update: Update, context: CallbackContext) -> None:
         if update.message:
             update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
         elif update.callback_query:
-            update.callback_query.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
+            update.callback_query.message.edit_text(translate('welcome', user_lang), reply_markup=reply_markup)
     else:
         if update.message:
             update.message.reply_text(translate('welcome', user_lang))
         elif update.callback_query:
-            update.callback_query.message.reply_text(translate('welcome', user_lang))
+            update.callback_query.message.edit_text(translate('welcome', user_lang))
 
 def change_language(update: Update, context: CallbackContext) -> None:
-    user_lang = update.effective_user.language_code
+    user_lang = context.user_data.get('language', update.effective_user.language_code)
     languages = get_available_languages()
     keyboard = [
         [InlineKeyboardButton(language_name, callback_data=f'set_language_{code}')]
@@ -52,14 +52,17 @@ def set_language(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     user_lang = query.data.split('_')[-1]
-    # Speichere die ausgewählte Sprache für den Benutzer (Implementiere diese Logik nach Bedarf)
+    # Speichere die ausgewählte Sprache für den Benutzer
     context.user_data['language'] = user_lang
-    query.edit_message_text(text=translate('language_set', user_lang))
+    # Erstelle das Hauptmenü nach der Sprachwahl neu
+    start(update, context)
+    # Füge die Bestätigungsmeldung hinzu
+    query.message.reply_text(translate('language_set', user_lang))
 
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
-    user_lang = query.from_user.language_code
+    user_lang = context.user_data.get('language', query.from_user.language_code)
     if query.data == 'change_language':
         change_language(update, context)
     elif query.data == 'select_group':

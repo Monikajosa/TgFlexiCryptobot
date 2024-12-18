@@ -1,6 +1,7 @@
 import logging
+import importlib
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, Filters, MessageHandler
 from config import TOKEN, OWNER_ID, LOG_LEVEL
 from admin.owner_admin_module import owner_menu, get_admin_modules
 from modules.moderation_module import moderation_module
@@ -19,26 +20,31 @@ logger = logging.getLogger(__name__)
 def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     chat = update.effective_chat
-    user_lang = get_user_language(user.id)
-    add_group(chat.id, chat.title)  # Füge die Gruppe/Kanal hinzu
-    print(f"User {user.id} language: {user_lang}")  # Debugging-Ausgabe
-    if is_owner(user.id, OWNER_ID):
-        keyboard = [
-            [InlineKeyboardButton(translate('change_language', user_lang), callback_data='change_language')],
-            [InlineKeyboardButton(translate('select_group', user_lang), callback_data='select_group')],
-            [InlineKeyboardButton(translate('owner_menu', user_lang), callback_data='owner_menu')],
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
 
-        if update.message:
-            update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
-        elif update.callback_query:
-            update.callback_query.message.edit_text(translate('welcome', user_lang), reply_markup=reply_markup)
+    # Wenn der Chat ein Gruppenchat oder ein Kanal ist
+    if chat.type in ['group', 'supergroup', 'channel']:
+        add_group(chat.id, chat.title)  # Gruppe/Kanal registrieren
+        update.message.reply_text(translate('group_registered', get_user_language(user.id)))
     else:
-        if update.message:
-            update.message.reply_text(translate('welcome', user_lang))
-        elif update.callback_query:
-            update.callback_query.message.edit_text(translate('welcome', user_lang))
+        user_lang = get_user_language(user.id)
+        print(f"User {user.id} language: {user_lang}")  # Debugging-Ausgabe
+        if is_owner(user.id, OWNER_ID):
+            keyboard = [
+                [InlineKeyboardButton(translate('change_language', user_lang), callback_data='change_language')],
+                [InlineKeyboardButton(translate('select_group', user_lang), callback_data='select_group')],
+                [InlineKeyboardButton(translate('owner_menu', user_lang), callback_data='owner_menu')],
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            if update.message:
+                update.message.reply_text(translate('welcome', user_lang), reply_markup=reply_markup)
+            elif update.callback_query:
+                update.callback_query.message.edit_text(translate('welcome', user_lang), reply_markup=reply_markup)
+        else:
+            if update.message:
+                update.message.reply_text(translate('welcome', user_lang))
+            elif update.callback_query:
+                update.callback_query.message.edit_text(translate('welcome', user_lang))
 
 def change_language(update: Update, context: CallbackContext) -> None:
     user_lang = get_user_language(update.effective_user.id)
@@ -125,12 +131,24 @@ def main() -> None:
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 
+    # Handler für den /start Befehl
     dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("ad_config", ad_config))
+
+    # Beispiel für einen spezifischen Befehl in einem Modul
+    dispatcher.add_handler(CommandHandler("specific_command", specific_command, Filters.chat_type.groups))
+
+    # CallbackQueryHandler für Buttons
     dispatcher.add_handler(CallbackQueryHandler(button))
+
+    # Filtern von Nachrichten, die keine Befehle sind, um keine Antwort zu senden
+    dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), lambda update, context: None))
 
     updater.start_polling()
     updater.idle()
+
+def specific_command(update: Update, context: CallbackContext) -> None:
+    # Beispiel für einen spezifischen Befehl in einem Modul
+    update.message.reply_text("Dies ist ein spezifischer Befehl, der in Gruppen/Kanälen funktioniert.")
 
 if __name__ == '__main__':
     main()

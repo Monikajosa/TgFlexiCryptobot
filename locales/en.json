@@ -17,5 +17,6 @@
     "change_language_not_implemented": "Change Language is not implemented yet.",
     "select_group_not_implemented": "Select Group is not implemented yet.",
     "choose_language": "Choose your language:",
-    "language_set": "Language has been set."
+    "language_set": "Language has been set.",
+    "group_registered": "Group/Channel '{chat_title}' successfully registered!"
 }

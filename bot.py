@@ -6,6 +6,7 @@ from admin.owner_admin_module import owner_menu, handle_owner_menu
 from modules.moderation_module import moderation_module
 from modules.welcome_module import welcome_module
 from utils.helpers import is_owner
+from utils.translation import translate
 from data.persistent_storage import init_db
 
 # Konfiguriere das Logging
@@ -16,24 +17,26 @@ def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     if is_owner(user.id, OWNER_ID):
         keyboard = [
-            [InlineKeyboardButton("Sprache ändern", callback_data='change_language')],
-            [InlineKeyboardButton("Gruppe wählen", callback_data='select_group')],
-            [InlineKeyboardButton("Owner Admin Menü", callback_data='owner_menu')],
+            [InlineKeyboardButton(translate('change_language', user.language_code), callback_data='change_language')],
+            [InlineKeyboardButton(translate('select_group', user.language_code), callback_data='select_group')],
+            [InlineKeyboardButton(translate('owner_menu', user.language_code), callback_data='owner_menu')],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text('Willkommen! Bitte wähle eine Option:', reply_markup=reply_markup)
+        update.message.reply_text(translate('welcome', user.language_code), reply_markup=reply_markup)
     else:
-        update.message.reply_text('Willkommen! Du hast keine Berechtigung, um auf das Admin-Menü zuzugreifen.')
+        update.message.reply_text(translate('welcome', user.language_code))
 
 def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     if query.data == 'change_language':
-        query.edit_message_text(text="Sprache ändern ist derzeit nicht implementiert.")
+        query.edit_message_text(text=translate('change_language_not_implemented', query.from_user.language_code))
     elif query.data == 'select_group':
-        query.edit_message_text(text="Gruppe wählen ist derzeit nicht implementiert.")
+        query.edit_message_text(text=translate('select_group_not_implemented', query.from_user.language_code))
     elif query.data == 'owner_menu':
         owner_menu(update, context)
+    elif query.data == 'back':
+        start(update, context)
 
 def main() -> None:
     # Initialisiere die Datenbank

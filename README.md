@@ -94,3 +94,22 @@ TgFlexiCryptobot/
 
 - **Erweiterte Fehlerprotokollierung:** Fehler werden ausführlich protokolliert, um die Wartung zu erleichtern.
 - **Benachrichtigungen:** Kritische Fehler lösen Benachrichtigungen an den Bot-Owner aus.
+
+Natürlich, ich kann Ihnen helfen, die README-Datei anzupassen, um sicherzustellen, dass alle notwendigen Informationen enthalten sind, insbesondere die Details zur dynamischen Button-Erzeugung in den Modulen.
+
+## Dynamische Button-Erzeugung
+
+Die dynamische Button-Erzeugung basiert auf den Modulen im `admin` Verzeichnis. Jedes Modul kann einen Button im Owner-Menü erzeugen, wenn es eine `module_name_key` Variable definiert.
+
+### Beispiel für ein Modul
+
+Erstellen Sie ein neues Modul im `admin` Verzeichnis, z.B. `example_module.py`:
+```python
+# example_module.py
+
+module_name_key = 'example_module_button'
+
+def example_function(update, context):
+    # Ihre Funktion hier
+    pass
+```

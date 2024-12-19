@@ -1,5 +1,3 @@
-# owner_admin_module.py
-
 import os
 import importlib
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup

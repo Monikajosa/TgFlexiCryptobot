@@ -1,5 +1,3 @@
-# bot.py
-
 import logging
 import importlib
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -91,14 +89,15 @@ def button(update: Update, context: CallbackContext) -> None:
         set_language(update, context)
     elif query.data.startswith('toggle_ad_'):
         toggle_ad(update, context)
-    elif query.data == module_name_key:  # Überprüfen Sie direkt auf module_name_key
-        ad_function_handler(update, context)
-    elif query.data in [module['name_key'] for module in get_admin_modules()]:  # Dynamische Überprüfung der Module
-        module = next(module for module in get_admin_modules() if module['name_key'] == query.data)
-        handler_name = f"{module['callback_data']}_handler"
-        module_obj = importlib.import_module(f"admin.{module['callback_data']}")
-        if hasattr(module_obj, handler_name):
-            getattr(module_obj, handler_name)(update, context)
+    elif query.data in [module['callback_data'] for module in get_admin_modules()]:  # Dynamische Überprüfung der Module
+        if query.data == 'ad_module':
+            ad_function_handler(update, context)
+        else:
+            module = next(module for module in get_admin_modules() if module['callback_data'] == query.data)
+            handler_name = f"{module['callback_data']}_handler"
+            module_obj = importlib.import_module(f"admin.{module['callback_data']}")
+            if hasattr(module_obj, handler_name):
+                getattr(module_obj, handler_name)(update, context)
     else:
         query.edit_message_text(text=translate('unknown_command', user_lang))
 

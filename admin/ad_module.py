@@ -1,10 +1,9 @@
-# ad_module.py
-
 import json
 import os
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
-from config import OWNER_ID  # Importieren Sie OWNER_ID aus config.py
+from config import OWNER_ID  # Importieren von OWNER_ID aus config.py
+from admin.group_manager import get_groups  # Importieren von get_groups
 
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'ad_settings.json')
 module_name_key = "ad_function"
@@ -36,7 +35,7 @@ def get_ad_button_label(chat_id, chat_title):
 
 def ad_function_handler(update: Update, context: CallbackContext):
     if update.effective_user.id != OWNER_ID:
-        update.message.reply_text("You are not authorized to perform this action.")
+        update.callback_query.message.reply_text("You are not authorized to perform this action.")
         return
 
     groups = get_groups()
@@ -48,7 +47,7 @@ def ad_function_handler(update: Update, context: CallbackContext):
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
+    update.callback_query.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
 
 def toggle_ad(update: Update, context: CallbackContext) -> None:
     query = update.callback_query

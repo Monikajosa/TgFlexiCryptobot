@@ -96,10 +96,10 @@ def button(update: Update, context: CallbackContext) -> None:
         toggle_ad(update, context)
     elif query.data == 'ad_function':
         ad_function_handler(update, context)
-    elif query.data == 'module_management':  # Fügen Sie diese Zeile hinzu
-        module_manager_menu(update, context)  # Fügen Sie diese Zeile hinzu
+    elif query.data == 'module_management':
+        module_manager_menu(update, context)
     elif query.data == 'back_to_owner_menu':
-        owner_menu(update, context)  # Zurück zum Owner-Menü
+        owner_menu(update, context)
     else:
         parts = query.data.split(':')
         if len(parts) == 2:
@@ -117,25 +117,11 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
     admin_modules = get_admin_modules()
 
     # Dynamisch generierte Buttons für Module
-    module_buttons = [
-        [InlineKeyboardButton(get_module_display_name(module, user_lang), callback_data=f'module:{module}')]
-        for module in get_module_names()
-    ]
-    
-    # Zusätzliche Admin-Module
-    admin_module_buttons = [
-        [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=module['callback_data'])]
+    keyboard = [
+        [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=f'module:{module["callback_data"]}')]
         for module in admin_modules
     ]
 
-    # Button für AD Function
-    ad_button = InlineKeyboardButton(translate('ad_function', user_lang), callback_data='ad_function')
-
-    # Button für Module Management
-    module_manager_button = InlineKeyboardButton(translate('module_manager', user_lang), callback_data='module_management')  # Fügen Sie diese Zeile hinzu
-
-    # Kombinieren Sie alle Buttons in einer Liste und stellen Sie sicher, dass keine Liste leer ist
-    keyboard = module_buttons + admin_module_buttons + [[ad_button], [module_manager_button]]  # Passen Sie diese Zeile an
     keyboard.append([InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -147,20 +133,26 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
 
 def module_menu(update: Update, context: CallbackContext, module_name: str) -> None:
     user_lang = get_user_language(update.effective_user.id)
-    module_functions = [func for func in dir(importlib.import_module(f'admin.{module_name}')) if callable(getattr(importlib.import_module(f'admin.{module_name}'), func))]
+    module = importlib.import_module(f'admin.{module_name}')
 
-    keyboard = [
-        [InlineKeyboardButton(func, callback_data=f'{module_name}:{func}')]
-        for func in module_functions
-    ]
+    # Überprüfen, ob das Modul ein spezifisches Menü hat
+    if hasattr(module, 'ad_function_handler'):
+        module.ad_function_handler(update, context)
+    else:
+        module_functions = [func for func in dir(module) if callable(getattr(module, func))]
 
-    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
-    reply_markup = InlineKeyboardMarkup(keyboard)
+        keyboard = [
+            [InlineKeyboardButton(func, callback_data=f'{module_name}:{func}')]
+            for func in module_functions
+        ]
 
-    if update.message:
-        update.message.reply_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
-    elif update.callback_query:
-        update.callback_query.message.edit_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
+        keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        if update.message:
+            update.message.reply_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
+        elif update.callback_query:
+            update.callback_query.message.edit_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
 
 def module_manager_menu(update: Update, context: CallbackContext) -> None:
     user_lang = get_user_language(update.effective_user.id)

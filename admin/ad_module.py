@@ -2,10 +2,10 @@ import json
 import os
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
-from config import OWNER_ID  # Importieren von OWNER_ID aus config.py
-from admin.group_manager import get_groups  # Importieren von get_groups
-from utils.translation import translate  # Importieren von translate
-from utils.persistence import get_user_language  # Importieren von get_user_language
+from config import OWNER_ID
+from admin.group_manager import get_groups
+from utils.translation import translate
+from utils.persistence import get_user_language
 
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'ad_settings.json')
 module_name_key = "ad_function"

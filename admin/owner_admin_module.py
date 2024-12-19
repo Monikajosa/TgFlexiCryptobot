@@ -20,7 +20,6 @@ def get_admin_modules():
                     "callback_data": module_name
                 })
     
-    # Entfernen Sie doppelte Module basierend auf "callback_data"
     unique_modules = {module["callback_data"]: module for module in modules}.values()
     return list(unique_modules)
 
@@ -28,13 +27,11 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
     user_lang = get_user_language(update.effective_user.id)
     admin_modules = get_admin_modules()
 
-    # Dynamisch generierte Buttons für Module
     keyboard = [
         [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=f'module:{module["callback_data"]}')]
         for module in admin_modules
     ]
 
-    # Füge den Back-Button hinzu
     keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_main_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)

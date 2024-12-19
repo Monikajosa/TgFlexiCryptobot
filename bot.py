@@ -128,7 +128,8 @@ def module_menu(update: Update, context: CallbackContext, module_name: str) -> N
         menu_function = getattr(module, f'{module_name}_menu')
         menu_function(update, context)
     else:
-        module_functions = [func for func in dir(module) if callable(getattr(module, func)) and not func.startswith('__')]
+        # Only include functions that are intended to be part of the menu
+        module_functions = [func for func in dir(module) if callable(getattr(module, func)) and func.endswith('_handler')]
 
         keyboard = [
             [InlineKeyboardButton(func, callback_data=f'{module_name}:{func}')]

@@ -96,6 +96,8 @@ def button(update: Update, context: CallbackContext) -> None:
         toggle_ad(update, context)
     elif query.data == 'ad_function':
         ad_function_handler(update, context)
+    elif query.data == 'module_management':  # Fügen Sie diese Zeile hinzu
+        module_manager_menu(update, context)  # Fügen Sie diese Zeile hinzu
     elif query.data == 'back_to_owner_menu':
         owner_menu(update, context)  # Zurück zum Owner-Menü
     else:
@@ -106,9 +108,9 @@ def button(update: Update, context: CallbackContext) -> None:
             if module_function:
                 module_function(update, context)
             else:
-                query.edit_message_text(text(translate('unknown_command', user_lang)))
+                query.edit_message_text(translate('unknown_command', user_lang))
         else:
-            query.edit_message_text(text(translate('unknown_command', user_lang)))
+            query.edit_message_text(translate('unknown_command', user_lang))
 
 def owner_menu(update: Update, context: CallbackContext) -> None:
     user_lang = get_user_language(update.effective_user.id)
@@ -129,8 +131,11 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
     # Button für AD Function
     ad_button = InlineKeyboardButton(translate('ad_function', user_lang), callback_data='ad_function')
 
+    # Button für Module Management
+    module_manager_button = InlineKeyboardButton(translate('module_manager', user_lang), callback_data='module_management')  # Fügen Sie diese Zeile hinzu
+
     # Kombinieren Sie alle Buttons in einer Liste und stellen Sie sicher, dass keine Liste leer ist
-    keyboard = module_buttons + admin_module_buttons + [[ad_button]]
+    keyboard = module_buttons + admin_module_buttons + [[ad_button], [module_manager_button]]  # Passen Sie diese Zeile an
     keyboard.append([InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -156,6 +161,23 @@ def module_menu(update: Update, context: CallbackContext, module_name: str) -> N
         update.message.reply_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
     elif update.callback_query:
         update.callback_query.message.edit_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
+
+def module_manager_menu(update: Update, context: CallbackContext) -> None:
+    user_lang = get_user_language(update.effective_user.id)
+    module_names = get_module_names()
+
+    keyboard = [
+        [InlineKeyboardButton(get_module_display_name(module, user_lang), callback_data=f'toggle_module:{module}')]
+        for module in module_names
+    ]
+
+    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if update.message:
+        update.message.reply_text(translate('module_manager', user_lang), reply_markup=reply_markup)
+    elif update.callback_query:
+        update.callback_query.message.edit_text(translate('module_manager', user_lang), reply_markup=reply_markup)
 
 def main() -> None:
     init_db()

@@ -7,7 +7,7 @@ from admin.owner_admin_module import owner_menu, get_admin_modules
 from utils.helpers import is_owner
 from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
-from admin.ad_module import is_ad_enabled, set_ad_enabled, get_ad_button_label, ad_function_handler, module_name_key, toggle_ad
+from admin.ad_module import ad_function_handler, toggle_ad
 from admin.group_manager import add_group, remove_group, get_groups
 from admin.module_manager import get_module_function, get_module_names, is_module_enabled, set_module_enabled, get_module_display_name
 from data.persistent_storage import init_db

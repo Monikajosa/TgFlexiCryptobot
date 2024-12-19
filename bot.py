@@ -9,7 +9,7 @@ from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
 from admin.ad_module import ad_function_handler, toggle_ad
 from admin.group_manager import add_group, remove_group, get_groups
-from admin.module_manager import get_module_function, get_module_names, is_module_enabled, set_module_enabled, get_module_display_name
+from admin.module_manager import get_module_function, get_module_names, is_module_enabled, set_module_enabled, get_module_display_name, module_manager_menu
 from data.persistent_storage import init_db
 
 # Konfiguriere das Logging
@@ -135,11 +135,12 @@ def module_menu(update: Update, context: CallbackContext, module_name: str) -> N
     user_lang = get_user_language(update.effective_user.id)
     module = importlib.import_module(f'admin.{module_name}')
 
-    # Überprüfen, ob das Modul ein spezifisches Menü hat
-    if hasattr(module, 'ad_function_handler'):
-        module.ad_function_handler(update, context)
+    # Überprüfen, ob das Modul eine spezifische Menüfunktion hat und diese aufrufen
+    if hasattr(module, f'{module_name}_menu'):
+        menu_function = getattr(module, f'{module_name}_menu')
+        menu_function(update, context)
     else:
-        module_functions = [func for func in dir(module) if callable(getattr(module, func))]
+        module_functions = [func for func in dir(module) if callable(getattr(module, func)) and not func.startswith('__')]
 
         keyboard = [
             [InlineKeyboardButton(func, callback_data=f'{module_name}:{func}')]

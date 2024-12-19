@@ -1,6 +1,10 @@
 import importlib
 import os
 import json
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext
+from utils.translation import translate
+from utils.persistence import get_user_language
 
 MODULES_FILE = os.path.join(os.path.dirname(__file__), 'modules.json')
 
@@ -44,3 +48,20 @@ def get_module_function(module_name, function_name):
         return None
     module = importlib.import_module(f'admin.{module_name}')
     return getattr(module, function_name, None)
+
+def module_manager_menu(update: Update, context: CallbackContext) -> None:
+    user_lang = get_user_language(update.effective_user.id)
+    module_names = get_module_names()
+
+    keyboard = [
+        [InlineKeyboardButton(get_module_display_name(module, user_lang), callback_data=f'toggle_module:{module}')]
+        for module in module_names
+    ]
+
+    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if update.message:
+        update.message.reply_text(translate('module_manager', user_lang), reply_markup=reply_markup)
+    elif update.callback_query:
+        update.callback_query.message.edit_text(translate('module_manager', user_lang), reply_markup=reply_markup)

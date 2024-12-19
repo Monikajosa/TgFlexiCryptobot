@@ -100,7 +100,7 @@ def button(update: Update, context: CallbackContext) -> None:
                 menu_function(update, context)
             else:
                 logger.debug(f"Menu function not found for module: {module_name}")
-                query.edit_message_text(translate('unknown_modulee', user_lang))  # Korrektur von 'unknown_command' zu 'unknown_modulee'
+                query.edit_message_text(translate('unknown_modulee', user_lang))
         else:
             logger.debug(f"Invalid callback data format: {query.data}")
             query.edit_message_text(translate('unknown_command', user_lang))

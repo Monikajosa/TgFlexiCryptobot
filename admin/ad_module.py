@@ -31,17 +31,19 @@ def set_ad_enabled(chat_id, enabled):
     settings[str(chat_id)]['ad_enabled'] = enabled
     save_settings(settings)
 
-def get_ad_button_label(chat_id, chat_title):
-    ad_status = "ON" if is_ad_enabled(chat_id) else "OFF"
-    return f"{chat_title} ({ad_status})"
-
-def ad_function_handler(update: Update, context: CallbackContext):
+def ad_menu(update: Update, context: CallbackContext):
+    """This function creates the AD settings menu."""
     if update.effective_user.id != OWNER_ID:
         update.callback_query.message.reply_text("You are not authorized to perform this action.")
         return
 
     user_lang = get_user_language(update.effective_user.id)
     groups = get_groups()
+
+    if not groups:
+        update.callback_query.message.reply_text("No groups/channels found.")
+        return
+
     keyboard = []
 
     for chat_id, chat_title in groups.items():
@@ -49,7 +51,7 @@ def ad_function_handler(update: Update, context: CallbackContext):
         status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
-    # Füge den Zurück-Button hinzu
+    # Add the back button
     keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -64,6 +66,11 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
 
     user_lang = get_user_language(update.effective_user.id)
     groups = get_groups()
+
+    if not groups:
+        query.edit_message_text("No groups/channels found.")
+        return
+
     keyboard = []
 
     for chat_id, chat_title in groups.items():
@@ -71,7 +78,7 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
         status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
-    # Füge den Zurück-Button hinzu
+    # Add the back button
     keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)

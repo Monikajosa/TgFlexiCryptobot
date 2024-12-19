@@ -52,7 +52,7 @@ def change_language(update: Update, context: CallbackContext) -> None:
         [InlineKeyboardButton(language_name, callback_data=f'set_language_{code}')]
         for code, language_name in languages.items()
     ]
-    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_main_menu')])
+    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     query = update.callback_query
     query.answer()
@@ -65,7 +65,7 @@ def set_language(update: Update, context: CallbackContext) -> None:
     set_user_language(query.from_user.id, user_lang)
     print(f"Set user {query.from_user.id} language to {user_lang}")
 
-    keyboard = [[InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')]]
+    keyboard = [[InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='owner_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(text=translate('language_set', user_lang), reply_markup=reply_markup)
 
@@ -80,7 +80,7 @@ def button(update: Update, context: CallbackContext) -> None:
         change_language(update, context)
     elif query.data == 'select_group':
         query.edit_message_text(translate('select_group_not_implemented', user_lang))
-    elif query.data == 'owner_menu':
+    elif query.data == 'owner_menu' or query.data == 'back_to_owner_menu':
         owner_menu(update, context)
     elif query.data == 'back':
         start(update, context)

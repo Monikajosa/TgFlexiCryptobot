@@ -13,7 +13,7 @@ def get_admin_modules():
         if hasattr(module, 'module_name_key'):
             admin_modules.append({
                 'name_key': module.module_name_key,  # Der Schlüssel für die Übersetzung des Modulnamens
-                'callback_data': module_name  # Der Modulname für die callback_data
+                'callback_data': f'module:{module_name}'  # Der Modulname für die callback_data
             })
     return admin_modules
 
@@ -22,7 +22,7 @@ def owner_menu(update: Update, context: CallbackContext):
     admin_modules = get_admin_modules()
 
     keyboard = [
-        [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=f'module:{module["callback_data"]}')]
+        [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=module['callback_data'])]
         for module in admin_modules
     ]
 

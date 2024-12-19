@@ -32,7 +32,7 @@ def set_ad_enabled(chat_id, enabled):
     settings[str(chat_id)]['ad_enabled'] = enabled
     save_settings(settings)
 
-def ad_function_menu(update: Update, context: CallbackContext):
+def ad_module_menu(update: Update, context: CallbackContext):
     """This function creates the AD settings menu."""
     if update.effective_user.id != OWNER_ID:
         update.callback_query.message.reply_text("You are not authorized to perform this action.")

@@ -90,6 +90,7 @@ def button(update: Update, context: CallbackContext) -> None:
         set_language(update, context)
     else:
         parts = query.data.split(':')
+        logger.debug(f"Parsed parts: {parts}")
         if len(parts) == 2:
             module_name, function_name = parts
             logger.debug(f"Module: {module_name}, Function: {function_name}")
@@ -99,7 +100,7 @@ def button(update: Update, context: CallbackContext) -> None:
                 menu_function(update, context)
             else:
                 logger.debug(f"Menu function not found for module: {module_name}")
-                query.edit_message_text(translate('unknown_command', user_lang))
+                query.edit_message_text(translate('unknown_modulee', user_lang))  # Korrektur von 'unknown_command' zu 'unknown_modulee'
         else:
             logger.debug(f"Invalid callback data format: {query.data}")
             query.edit_message_text(translate('unknown_command', user_lang))

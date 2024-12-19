@@ -91,8 +91,8 @@ def button(update: Update, context: CallbackContext) -> None:
     else:
         parts = query.data.split(':')
         logger.debug(f"Parsed parts: {parts}")
-        if len(parts) == 2:
-            module_name, function_name = parts
+        if len(parts) == 3:
+            _, module_name, function_name = parts
             logger.debug(f"Module: {module_name}, Function: {function_name}")
             if module_name in MODULES and function_name == 'menu':
                 menu_function = MODULES[module_name]

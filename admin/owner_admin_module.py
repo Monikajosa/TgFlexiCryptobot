@@ -13,7 +13,7 @@ def get_admin_modules():
         if hasattr(module, 'module_name_key'):
             admin_modules.append({
                 'name_key': module.module_name_key,  # Der Schlüssel für die Übersetzung des Modulnamens
-                'callback_data': f'module:{module_name}'  # Der Modulname für die callback_data
+                'callback_data': f'module:{module_name}:menu'  # Der Modulname und Funktionsname für die callback_data
             })
     return admin_modules
 

@@ -7,8 +7,9 @@ from admin.group_manager import get_groups
 from utils.translation import translate
 from utils.persistence import get_user_language
 
-SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'ad_settings.json')
 module_name_key = "ad_function"
+
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'ad_settings.json')
 
 def load_settings():
     if os.path.exists(SETTINGS_FILE):
@@ -51,7 +52,6 @@ def ad_menu(update: Update, context: CallbackContext):
         status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
-    # Add the back button
     keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -78,7 +78,6 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
         status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
-    # Add the back button
     keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)

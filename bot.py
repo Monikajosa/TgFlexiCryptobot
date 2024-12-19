@@ -3,12 +3,11 @@ import importlib
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, Filters, MessageHandler
 from config import TOKEN, OWNER_ID, LOG_LEVEL
-from admin.owner_admin_module import owner_menu, get_admin_modules
+from admin.owner_admin_module import owner_menu
 from utils.helpers import is_owner
 from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
 from admin.group_manager import add_group, remove_group, get_groups
-from admin.module_manager import get_module_function, get_module_names, is_module_enabled, set_module_enabled, get_module_display_name, module_manager_menu
 from data.persistent_storage import init_db
 
 logging.basicConfig(level=LOG_LEVEL)
@@ -74,16 +73,13 @@ def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     user_lang = get_user_language(query.from_user.id)
-    
+
     if query.data == 'change_language':
         change_language(update, context)
     elif query.data == 'select_group':
         query.edit_message_text(translate('select_group_not_implemented', user_lang))
     elif query.data == 'owner_menu':
         owner_menu(update, context)
-    elif query.data.startswith('module:'):
-        module_name = query.data.split(':')[1]
-        module_menu(update, context, module_name)
     elif query.data == 'back':
         start(update, context)
     elif query.data == 'back_to_main_menu':
@@ -94,72 +90,24 @@ def button(update: Update, context: CallbackContext) -> None:
         parts = query.data.split(':')
         if len(parts) == 2:
             module_name, function_name = parts
-            module_function = get_module_function(module_name, function_name)
-            if module_function:
-                module_function(update, context)
-            else:
+            try:
+                module = importlib.import_module(f'admin.{module_name}')
+                if function_name == 'menu':
+                    menu_function = getattr(module, f'{module_name}_menu', None)
+                    if menu_function:
+                        menu_function(update, context)
+                    else:
+                        query.edit_message_text(translate('unknown_command', user_lang))
+                else:
+                    function_to_call = getattr(module, function_name, None)
+                    if function_to_call:
+                        function_to_call(update, context)
+                    else:
+                        query.edit_message_text(translate('unknown_command', user_lang))
+            except ModuleNotFoundError:
                 query.edit_message_text(translate('unknown_command', user_lang))
         else:
             query.edit_message_text(translate('unknown_command', user_lang))
-
-def owner_menu(update: Update, context: CallbackContext) -> None:
-    user_lang = get_user_language(update.effective_user.id)
-    admin_modules = get_admin_modules()
-
-    keyboard = [
-        [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=f'module:{module["callback_data"]}')]
-        for module in admin_modules
-    ]
-
-    keyboard.append([InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')])
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    if update.message:
-        update.message.reply_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
-    elif update.callback_query:
-        update.callback_query.message.edit_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
-
-def module_menu(update: Update, context: CallbackContext, module_name: str) -> None:
-    user_lang = get_user_language(update.effective_user.id)
-    module = importlib.import_module(f'admin.{module_name}')
-
-    if hasattr(module, f'{module_name}_menu'):
-        menu_function = getattr(module, f'{module_name}_menu')
-        menu_function(update, context)
-    else:
-        # Only include functions that are intended to be part of the menu
-        module_functions = [func for func in dir(module) if callable(getattr(module, func)) and func.endswith('_handler')]
-
-        keyboard = [
-            [InlineKeyboardButton(func, callback_data=f'{module_name}:{func}')]
-            for func in module_functions
-        ]
-
-        keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        if update.message:
-            update.message.reply_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
-        elif update.callback_query:
-            update.callback_query.message.edit_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
-
-def module_manager_menu(update: Update, context: CallbackContext) -> None:
-    user_lang = get_user_language(update.effective_user.id)
-    module_names = get_module_names()
-
-    keyboard = [
-        [InlineKeyboardButton(get_module_display_name(module, user_lang), callback_data=f'toggle_module:{module}')]
-        for module in module_names
-    ]
-
-    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    if update.message:
-        update.message.reply_text(translate('module_manager', user_lang), reply_markup=reply_markup)
-    elif update.callback_query:
-        update.callback_query.message.edit_text(translate('module_manager', user_lang), reply_markup=reply_markup)
 
 def main() -> None:
     init_db()

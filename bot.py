@@ -95,10 +95,14 @@ def button(update: Update, context: CallbackContext) -> None:
     elif query.data.startswith('toggle_ad_'):
         toggle_ad(update, context)
     else:
-        module_name, function_name = query.data.split(':')
-        module_function = get_module_function(module_name, function_name)
-        if module_function:
-            module_function(update, context)
+        parts = query.data.split(':')
+        if len(parts) == 2:
+            module_name, function_name = parts
+            module_function = get_module_function(module_name, function_name)
+            if module_function:
+                module_function(update, context)
+            else:
+                query.edit_message_text(text=translate('unknown_command', user_lang))
         else:
             query.edit_message_text(text=translate('unknown_command', user_lang))
 

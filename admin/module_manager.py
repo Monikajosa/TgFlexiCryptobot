@@ -30,10 +30,10 @@ def set_module_enabled(module_name, enabled):
 
 def get_module_names():
     modules_dir = os.path.join(os.path.dirname(__file__), '..', 'modules')
-    return [name for name in os.listdir(modules_dir) if os.path.isdir(os.path.join(modules_dir, name))]
+    return [name for name in os.listdir(modules_dir) if os.path.isdir(os.path.join(modules_dir, name)) and not name.startswith('__')]
 
 def get_module_display_name(module_name, user_lang):
-    module = importlib.import_module(f'admin.{module_name}')
+    module = importlib.import_module(f'modules.{module_name}')
     if hasattr(module, 'module_name_key'):
         name_key = getattr(module, 'module_name_key')
         return translate(name_key, user_lang)

@@ -1,5 +1,4 @@
 import logging
-import importlib
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext, Filters, MessageHandler
 from config import TOKEN, OWNER_ID, LOG_LEVEL
@@ -9,6 +8,7 @@ from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
 from admin.group_manager import add_group, remove_group, get_groups
 from data.persistent_storage import init_db
+from zentrale_module import MODULES  # Importiere die zentrale Module-Liste
 
 logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
@@ -74,6 +74,8 @@ def button(update: Update, context: CallbackContext) -> None:
     query.answer()
     user_lang = get_user_language(query.from_user.id)
 
+    logger.debug(f"Callback data received: {query.data}")
+
     if query.data == 'change_language':
         change_language(update, context)
     elif query.data == 'select_group':
@@ -90,23 +92,16 @@ def button(update: Update, context: CallbackContext) -> None:
         parts = query.data.split(':')
         if len(parts) == 2:
             module_name, function_name = parts
-            try:
-                module = importlib.import_module(f'admin.{module_name}')
-                if function_name == 'menu':
-                    menu_function = getattr(module, f'{module_name}_menu', None)
-                    if menu_function:
-                        menu_function(update, context)
-                    else:
-                        query.edit_message_text(translate('unknown_command', user_lang))
-                else:
-                    function_to_call = getattr(module, function_name, None)
-                    if function_to_call:
-                        function_to_call(update, context)
-                    else:
-                        query.edit_message_text(translate('unknown_command', user_lang))
-            except ModuleNotFoundError:
+            logger.debug(f"Module: {module_name}, Function: {function_name}")
+            if module_name in MODULES and function_name == 'menu':
+                menu_function = MODULES[module_name]
+                logger.debug(f"Calling menu function for module: {module_name}")
+                menu_function(update, context)
+            else:
+                logger.debug(f"Menu function not found for module: {module_name}")
                 query.edit_message_text(translate('unknown_command', user_lang))
         else:
+            logger.debug(f"Invalid callback data format: {query.data}")
             query.edit_message_text(translate('unknown_command', user_lang))
 
 def main() -> None:

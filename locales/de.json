@@ -18,5 +18,9 @@
     "select_group_not_implemented": "Gruppe wählen ist derzeit nicht implementiert.",
     "choose_language": "Wähle deine Sprache:",
     "language_set": "Sprache wurde eingestellt.",
-    "group_registered": "Gruppe/Kanal '{chat_title}' erfolgreich registriert!"
+    "group_registered": "Gruppe/Kanal '{chat_title}' erfolgreich registriert!",
+    "unknown_command": "Unbekannter Befehl",
+    "module_manager": "Modulverwaltung",
+    "moderation_module_name": "Moderationsmodul",
+    "welcome_module_name": "Begrüßungsmodul"
 }

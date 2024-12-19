@@ -9,6 +9,7 @@ from utils.translation import translate, get_available_languages
 from utils.persistence import get_user_language, set_user_language
 from admin.ad_module import is_ad_enabled, set_ad_enabled, get_ad_button_label, ad_function_handler, module_name_key, toggle_ad
 from admin.group_manager import add_group, remove_group, get_groups
+from admin.module_manager import get_module_function, get_module_names, is_module_enabled, set_module_enabled, get_module_display_name
 from data.persistent_storage import init_db
 
 # Konfiguriere das Logging
@@ -75,12 +76,16 @@ def button(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     user_lang = get_user_language(query.from_user.id)
+    
     if query.data == 'change_language':
         change_language(update, context)
     elif query.data == 'select_group':
         query.edit_message_text(translate('select_group_not_implemented', user_lang))
     elif query.data == 'owner_menu':
         owner_menu(update, context)
+    elif query.data.startswith('module:'):
+        module_name = query.data.split(':')[1]
+        module_menu(update, context, module_name)
     elif query.data == 'back':
         start(update, context)
     elif query.data == 'back_to_main_menu':
@@ -89,26 +94,31 @@ def button(update: Update, context: CallbackContext) -> None:
         set_language(update, context)
     elif query.data.startswith('toggle_ad_'):
         toggle_ad(update, context)
-    elif query.data in [module['callback_data'] for module in get_admin_modules()]:  # Dynamische Überprüfung der Module
-        if query.data == 'ad_module':
-            ad_function_handler(update, context)
-        else:
-            module = next(module for module in get_admin_modules() if module['callback_data'] == query.data)
-            handler_name = f"{module['callback_data']}_handler"
-            module_obj = importlib.import_module(f"admin.{module['callback_data']}")
-            if hasattr(module_obj, handler_name):
-                getattr(module_obj, handler_name)(update, context)
     else:
-        query.edit_message_text(text=translate('unknown_command', user_lang))
+        module_name, function_name = query.data.split(':')
+        module_function = get_module_function(module_name, function_name)
+        if module_function:
+            module_function(update, context)
+        else:
+            query.edit_message_text(text=translate('unknown_command', user_lang))
 
 def owner_menu(update: Update, context: CallbackContext) -> None:
     user_lang = get_user_language(update.effective_user.id)
     admin_modules = get_admin_modules()
 
-    keyboard = [
+    # Dynamisch generierte Buttons für Module
+    module_buttons = [
+        [InlineKeyboardButton(get_module_display_name(module, user_lang), callback_data=f'module:{module}')]
+        for module in get_module_names()
+    ]
+    
+    # Zusätzliche Admin-Module
+    admin_module_buttons = [
         [InlineKeyboardButton(translate(module['name_key'], user_lang), callback_data=module['callback_data'])]
         for module in admin_modules
     ]
+
+    keyboard = module_buttons + admin_module_buttons
     keyboard.append([InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -117,6 +127,23 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
     elif update.callback_query:
         update.callback_query.message.edit_text(translate('owner_menu', user_lang), reply_markup=reply_markup)
+
+def module_menu(update: Update, context: CallbackContext, module_name: str) -> None:
+    user_lang = get_user_language(update.effective_user.id)
+    module_functions = [func for func in dir(importlib.import_module(f'modules.{module_name}')) if callable(getattr(importlib.import_module(f'modules.{module_name}'), func))]
+
+    keyboard = [
+        [InlineKeyboardButton(func, callback_data=f'{module_name}:{func}')]
+        for func in module_functions
+    ]
+
+    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='owner_menu')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if update.message:
+        update.message.reply_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
+    elif update.callback_query:
+        update.callback_query.message.edit_text(translate(f'{module_name}_functions', user_lang), reply_markup=reply_markup)
 
 def main() -> None:
     init_db()

@@ -104,9 +104,9 @@ def button(update: Update, context: CallbackContext) -> None:
             if module_function:
                 module_function(update, context)
             else:
-                query.edit_message_text(text=translate('unknown_command', user_lang))
+                query.edit_message_text(text(translate('unknown_command', user_lang)))
         else:
-            query.edit_message_text(text=translate('unknown_command', user_lang))
+            query.edit_message_text(text(translate('unknown_command', user_lang)))
 
 def owner_menu(update: Update, context: CallbackContext) -> None:
     user_lang = get_user_language(update.effective_user.id)
@@ -124,10 +124,11 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
         for module in admin_modules
     ]
 
-    ad_button = [InlineKeyboardButton(translate('ad_function', user_lang), callback_data='ad_function')]
+    # Button für AD Function
+    ad_button = InlineKeyboardButton(translate('ad_function', user_lang), callback_data='ad_function')
 
     # Kombinieren Sie alle Buttons in einer Liste und stellen Sie sicher, dass keine Liste leer ist
-    keyboard = [btn for btn in module_buttons + admin_module_buttons + [ad_button] if btn]
+    keyboard = module_buttons + admin_module_buttons + [[ad_button]]
     keyboard.append([InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)

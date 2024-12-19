@@ -55,7 +55,8 @@ def ad_module_menu(update: Update, context: CallbackContext):
     keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.callback_query.message.reply_text(translate('configure_ad_settings', user_lang), reply_markup=reply_markup)
+    query = update.callback_query
+    query.edit_message_text(translate('configure_ad_settings', user_lang), reply_markup=reply_markup)
 
 def toggle_ad(update: Update, context: CallbackContext) -> None:
     query = update.callback_query

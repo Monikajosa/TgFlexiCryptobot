@@ -22,5 +22,6 @@
     "unknown_command": "Unbekannter Befehl",
     "module_manager": "Modulverwaltung",
     "moderation_module_name": "Moderationsmodul",
-    "welcome_module_name": "Begrüßungsmodul"
+    "welcome_module_name": "Begrüßungsmodul",
+    "configure_ad_settings": "Konfigurieren Sie die AD-Einstellungen für jede Gruppe/Kanal:"
 }

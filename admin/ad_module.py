@@ -4,6 +4,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 from config import OWNER_ID  # Importieren von OWNER_ID aus config.py
 from admin.group_manager import get_groups  # Importieren von get_groups
+from utils.translation import translate  # Importieren von translate
+from utils.persistence import get_user_language  # Importieren von get_user_language
 
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'ad_settings.json')
 module_name_key = "ad_function"
@@ -38,6 +40,7 @@ def ad_function_handler(update: Update, context: CallbackContext):
         update.callback_query.message.reply_text("You are not authorized to perform this action.")
         return
 
+    user_lang = get_user_language(update.effective_user.id)
     groups = get_groups()
     keyboard = []
 
@@ -47,10 +50,10 @@ def ad_function_handler(update: Update, context: CallbackContext):
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
     # Füge den Zurück-Button hinzu
-    keyboard.append([InlineKeyboardButton("Zurück", callback_data='back_to_owner_menu')])
+    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.callback_query.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
+    update.callback_query.message.reply_text(translate('configure_ad_settings', user_lang), reply_markup=reply_markup)
 
 def toggle_ad(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
@@ -59,6 +62,7 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
     current_status = is_ad_enabled(chat_id)
     set_ad_enabled(chat_id, not current_status)
 
+    user_lang = get_user_language(update.effective_user.id)
     groups = get_groups()
     keyboard = []
 
@@ -68,7 +72,7 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
     # Füge den Zurück-Button hinzu
-    keyboard.append([InlineKeyboardButton("Zurück", callback_data='back_to_owner_menu')])
+    keyboard.append([InlineKeyboardButton(translate('back', user_lang), callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    query.edit_message_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
+    query.edit_message_text(translate('configure_ad_settings', user_lang), reply_markup=reply_markup)

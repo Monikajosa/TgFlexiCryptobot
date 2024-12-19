@@ -22,5 +22,6 @@
     "unknown_command": "Unknown Command",
     "welcome_module_name": "Welcome Module",
     "module_manager": "Module Manager",
-    "moderation_module_name": "Moderation Module"
+    "moderation_module_name": "Moderation Module",
+    "configure_ad_settings": "Configure AD settings for each group/channel:"
 }

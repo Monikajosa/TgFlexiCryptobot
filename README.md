@@ -49,10 +49,10 @@ TgFlexiCryptobot/
   - Zugang:
     - Nur die in `.env` definierte Owner-ID hat Zugriff auf dieses Menü.
   - Funktionen:
-    - Module hierzu liegen in `/admin`. Folgende Grundmodule stellt das Grundgerüst bereits zur Verfügung:
-      - AD-Funktion: Aktivierung/Deaktivierung für jede Gruppe.
-      - Modulverwaltung: Aktivierung/Deaktivierung von Modulen.
-      - Bot-Status: Übersicht über aktive Gruppen und Benutzer.
+    - Module hierzu liegen in `/admin`. Folgende Grundmodule stellt das Grundgerüst bereits zur Verfügung, jedes Button (Buttons werden dynamisch anhand einer Variable im Modul Code beschriftet) hat ein Modul mit folgenden funktionen dahinter:
+      - Modul für AD-Funktion: Aktivierung/Deaktivierung für jede Gruppe.
+      - Modul für Modulverwaltung: Aktivierung/Deaktivierung von Modulen.
+      - Modul für Bot-Status: Übersicht über aktive Gruppen und Benutzer.
     - Das Menü wird jetzt aktualisiert, anstatt ein neues Menü zu erzeugen, wenn darauf zugegriffen wird.
 
 ### Botaktionen

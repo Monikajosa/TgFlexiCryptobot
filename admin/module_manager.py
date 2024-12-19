@@ -29,11 +29,11 @@ def set_module_enabled(module_name, enabled):
     save_modules(modules)
 
 def get_module_names():
-    modules_dir = os.path.join(os.path.dirname(__file__), '..', 'modules')
+    modules_dir = os.path.join(os.path.dirname(__file__), '..', 'admin')
     return [name for name in os.listdir(modules_dir) if os.path.isdir(os.path.join(modules_dir, name)) and not name.startswith('__')]
 
 def get_module_display_name(module_name, user_lang):
-    module = importlib.import_module(f'modules.{module_name}')
+    module = importlib.import_module(f'admin.{module_name}')
     if hasattr(module, 'module_name_key'):
         name_key = getattr(module, 'module_name_key')
         return translate(name_key, user_lang)
@@ -42,5 +42,5 @@ def get_module_display_name(module_name, user_lang):
 def get_module_function(module_name, function_name):
     if not is_module_enabled(module_name):
         return None
-    module = importlib.import_module(f'modules.{module_name}')
+    module = importlib.import_module(f'admin.{module_name}')
     return getattr(module, function_name, None)

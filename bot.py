@@ -94,6 +94,8 @@ def button(update: Update, context: CallbackContext) -> None:
         set_language(update, context)
     elif query.data.startswith('toggle_ad_'):
         toggle_ad(update, context)
+    elif query.data == 'ad_function':
+        ad_function_handler(update, context)
     else:
         parts = query.data.split(':')
         if len(parts) == 2:
@@ -122,7 +124,10 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
         for module in admin_modules
     ]
 
-    keyboard = module_buttons + admin_module_buttons
+    ad_button = [InlineKeyboardButton(translate('ad_function', user_lang), callback_data='ad_function')]
+
+    # Kombinieren Sie alle Buttons in einer Liste und stellen Sie sicher, dass keine Liste leer ist
+    keyboard = [btn for btn in module_buttons + admin_module_buttons + [ad_button] if btn]
     keyboard.append([InlineKeyboardButton(translate('back_to_main_menu', user_lang), callback_data='back_to_main_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -134,7 +139,7 @@ def owner_menu(update: Update, context: CallbackContext) -> None:
 
 def module_menu(update: Update, context: CallbackContext, module_name: str) -> None:
     user_lang = get_user_language(update.effective_user.id)
-    module_functions = [func for func in dir(importlib.import_module(f'modules.{module_name}')) if callable(getattr(importlib.import_module(f'modules.{module_name}'), func))]
+    module_functions = [func for func in dir(importlib.import_module(f'admin.{module_name}')) if callable(getattr(importlib.import_module(f'admin.{module_name}'), func))]
 
     keyboard = [
         [InlineKeyboardButton(func, callback_data=f'{module_name}:{func}')]

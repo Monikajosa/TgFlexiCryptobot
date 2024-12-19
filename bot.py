@@ -96,6 +96,8 @@ def button(update: Update, context: CallbackContext) -> None:
         toggle_ad(update, context)
     elif query.data == 'ad_function':
         ad_function_handler(update, context)
+    elif query.data == 'back_to_owner_menu':
+        owner_menu(update, context)  # Zurück zum Owner-Menü
     else:
         parts = query.data.split(':')
         if len(parts) == 2:

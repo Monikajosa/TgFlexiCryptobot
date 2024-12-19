@@ -46,6 +46,9 @@ def ad_function_handler(update: Update, context: CallbackContext):
         status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
 
+    # Füge den Zurück-Button hinzu
+    keyboard.append([InlineKeyboardButton("Zurück", callback_data='back_to_owner_menu')])
+
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.callback_query.message.reply_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
 
@@ -63,6 +66,9 @@ def toggle_ad(update: Update, context: CallbackContext) -> None:
         current_status = is_ad_enabled(chat_id)
         status_label = "ON" if current_status else "OFF"
         keyboard.append([InlineKeyboardButton(f"{chat_title} ({status_label})", callback_data=f"toggle_ad_{chat_id}")])
+
+    # Füge den Zurück-Button hinzu
+    keyboard.append([InlineKeyboardButton("Zurück", callback_data='back_to_owner_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text("Configure AD settings for each group/channel:", reply_markup=reply_markup)
